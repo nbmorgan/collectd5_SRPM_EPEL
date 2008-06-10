@@ -1,7 +1,7 @@
 Summary: Statistics collection daemon for filling RRD files
 Name: collectd
 Version: 4.3.2
-Release: 8%{?dist}
+Release: 9%{?dist}
 License: GPLv2
 Group: System Environment/Daemons
 URL: http://collectd.org/
@@ -20,9 +20,6 @@ BuildRequires: net-snmp-devel
 BuildRequires: libpcap-devel
 BuildRequires: mysql-devel
 
-Requires: rrdtool
-
-
 %description
 collectd is a small daemon written in C for performance.  It reads various
 system  statistics  and updates  RRD files,  creating  them if necessary.
@@ -38,7 +35,7 @@ Requires:      collectd = %{version}, curl
 %description apache
 This plugin collectd data provided by Apache's 'mod_status'.
 
- 
+
 %package email
 Summary:       Email plugin for collectd
 Group:         System Environment/Daemons
@@ -54,7 +51,7 @@ Requires:      collectd = %{version}, mysql
 %description mysql
 MySQL querying plugin. This plugins provides data of issued commands,
 called handlers and database traffic.
- 
+
 
 %package nginx
 Summary:       Nginx plugin for collectd
@@ -69,9 +66,16 @@ Summary:       Perl bindings for collectd
 Group:         System Environment/Daemons
 Requires:      collectd = %{version}, curl
 Requires: perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
-
 %description -n perl-Collectd
 This package contains Perl bindings and plugin for collectd.
+
+
+%package rrdtool
+Summary:       RRDTool module for collectd
+Group:         System Environment/Daemons
+Requires:      rrdtool
+%description rrdtool
+This plugin for collectd provides rrdtool support.
 
 
 %package sensors
@@ -195,6 +199,7 @@ fi
 %exclude %{_libdir}/collectd/mysql.so*
 %exclude %{_libdir}/collectd/nginx.so*
 %exclude %{_libdir}/collectd/perl.so*
+%exclude %{_libdir}/collectd/rrdtool.so*
 %exclude %{_libdir}/collectd/sensors.so*
 %exclude %{_libdir}/collectd/snmp.so*
 
@@ -241,6 +246,12 @@ fi
 %doc %{_mandir}/man5/collectd-perl.5*
 %doc %{_mandir}/man3/Collectd::Unixsock.3pm*
 
+
+%files rrdtool
+%doc COPYING
+%{_libdir}/collectd/rrdtool.so*
+
+
 %files sensors
 %doc COPYING
 %{_libdir}/collectd/sensors.so*
@@ -260,6 +271,9 @@ fi
 
 
 %changelog
+* Tue Jun 10 2008 Chris Lalancette <clalance@redhat.com> - 4.3.2-9
+- Split rrdtool into a subpackage.
+
 * Wed Apr 23 2008 Richard W.M. Jones <rjones@redhat.com> - 4.3.2-8
 - Added {?dist} to release number (thanks Alan Pevec).
 
