@@ -1,7 +1,7 @@
 Summary: Statistics collection daemon for filling RRD files
 Name: collectd
 Version: 4.3.3
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv2
 Group: System Environment/Daemons
 URL: http://collectd.org/
@@ -32,7 +32,7 @@ fine grained since the files are updated every 10 seconds.
 %package apache
 Summary:       Apache plugin for collectd
 Group:         System Environment/Daemons
-Requires:      collectd = %{version}, curl
+Requires:      collectd = %{version}-%{release}, curl
 %description apache
 This plugin collects data provided by Apache's 'mod_status'.
 
@@ -40,7 +40,7 @@ This plugin collects data provided by Apache's 'mod_status'.
 %package dns
 Summary:       DNS traffic analysis module for collectd
 Group:         System Environment/Daemons
-Requires:      collectd = %{version}
+Requires:      collectd = %{version}-%{release}
 %description dns
 This plugin collects DNS traffic data.
 
@@ -48,7 +48,7 @@ This plugin collects DNS traffic data.
 %package email
 Summary:       Email plugin for collectd
 Group:         System Environment/Daemons
-Requires:      collectd = %{version}, spamassassin
+Requires:      collectd = %{version}-%{release}, spamassassin
 %description email
 This plugin collects data provided by spamassassin.
 
@@ -56,7 +56,7 @@ This plugin collects data provided by spamassassin.
 %package mysql
 Summary:       MySQL module for collectd
 Group:         System Environment/Daemons
-Requires:      collectd = %{version}, mysql
+Requires:      collectd = %{version}-%{release}, mysql
 %description mysql
 MySQL querying plugin. This plugins provides data of issued commands,
 called handlers and database traffic.
@@ -65,7 +65,7 @@ called handlers and database traffic.
 %package nginx
 Summary:       Nginx plugin for collectd
 Group:         System Environment/Daemons
-Requires:      collectd = %{version}, curl
+Requires:      collectd = %{version}-%{release}, curl
 %description nginx
 This plugin gets data provided by nginx.
 
@@ -73,7 +73,7 @@ This plugin gets data provided by nginx.
 %package -n perl-Collectd
 Summary:       Perl bindings for collectd
 Group:         System Environment/Daemons
-Requires:      collectd = %{version}
+Requires:      collectd = %{version}-%{release}
 Requires: perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
 %description -n perl-Collectd
 This package contains Perl bindings and plugin for collectd.
@@ -82,7 +82,7 @@ This package contains Perl bindings and plugin for collectd.
 %package rrdtool
 Summary:       RRDTool module for collectd
 Group:         System Environment/Daemons
-Requires:      collectd = %{version}, rrdtool
+Requires:      collectd = %{version}-%{release}, rrdtool
 %description rrdtool
 This plugin for collectd provides rrdtool support.
 
@@ -90,7 +90,7 @@ This plugin for collectd provides rrdtool support.
 %package sensors
 Summary:       Libsensors module for collectd
 Group:         System Environment/Daemons
-Requires:      collectd = %{version}, lm_sensors
+Requires:      collectd = %{version}-%{release}, lm_sensors
 %description sensors
 This plugin for collectd provides querying of sensors supported by
 lm_sensors.
@@ -99,7 +99,7 @@ lm_sensors.
 %package snmp
 Summary:        SNMP module for collectd
 Group:          System Environment/Daemons
-Requires:       collectd = %{version}, net-snmp
+Requires:       collectd = %{version}-%{release}, net-snmp
 %description snmp
 This plugin for collectd provides querying of net-snmp.
 
@@ -107,7 +107,7 @@ This plugin for collectd provides querying of net-snmp.
 %package virt
 Summary:       Libvirt plugin for collectd
 Group:         System Environment/Daemons
-Requires:      collectd = %{version}, libvirt
+Requires:      collectd = %{version}-%{release}, libvirt
 %description virt
 This plugin collects information from virtualized guests.
 
@@ -301,6 +301,9 @@ fi
 
 
 %changelog
+* Thu Jun 12 2008 Alan Pevec <apevec@redhat.com> 4.3.3-2
+- fix sub to main packge dependency
+
 * Thu Jun 12 2008 Alan Pevec <apevec@redhat.com> 4.3.3-1
 - New upstream version 4.3.3.
 - include /etc/collectd.d (bz#443942)
