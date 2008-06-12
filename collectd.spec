@@ -1,12 +1,13 @@
 Summary: Statistics collection daemon for filling RRD files
 Name: collectd
-Version: 4.3.2
-Release: 9%{?dist}
+Version: 4.3.3
+Release: 1%{?dist}
 License: GPLv2
 Group: System Environment/Daemons
 URL: http://collectd.org/
 
 Source: http://collectd.org/files/%{name}-%{version}.tar.bz2
+Patch0: %{name}-4.3.3-include-collectd.d.patch
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
 BuildRequires: libvirt-devel, libxml2-devel
@@ -33,7 +34,15 @@ Summary:       Apache plugin for collectd
 Group:         System Environment/Daemons
 Requires:      collectd = %{version}, curl
 %description apache
-This plugin collectd data provided by Apache's 'mod_status'.
+This plugin collects data provided by Apache's 'mod_status'.
+
+
+%package dns
+Summary:       DNS traffic analysis module for collectd
+Group:         System Environment/Daemons
+Requires:      collectd = %{version}
+%description dns
+This plugin collects DNS traffic data.
 
 
 %package email
@@ -41,7 +50,7 @@ Summary:       Email plugin for collectd
 Group:         System Environment/Daemons
 Requires:      collectd = %{version}, spamassassin
 %description email
-This plugin collectd data provided by spamassassin.
+This plugin collects data provided by spamassassin.
 
 
 %package mysql
@@ -64,7 +73,7 @@ This plugin gets data provided by nginx.
 %package -n perl-Collectd
 Summary:       Perl bindings for collectd
 Group:         System Environment/Daemons
-Requires:      collectd = %{version}, curl
+Requires:      collectd = %{version}
 Requires: perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
 %description -n perl-Collectd
 This package contains Perl bindings and plugin for collectd.
@@ -73,7 +82,7 @@ This package contains Perl bindings and plugin for collectd.
 %package rrdtool
 Summary:       RRDTool module for collectd
 Group:         System Environment/Daemons
-Requires:      rrdtool
+Requires:      collectd = %{version}, rrdtool
 %description rrdtool
 This plugin for collectd provides rrdtool support.
 
@@ -98,13 +107,14 @@ This plugin for collectd provides querying of net-snmp.
 %package virt
 Summary:       Libvirt plugin for collectd
 Group:         System Environment/Daemons
-Requires:      collectd = %{version}, curl
+Requires:      collectd = %{version}, libvirt
 %description virt
 This plugin collects information from virtualized guests.
 
 
 %prep
 %setup -q
+%patch0 -p1
 
 sed -i.orig -e 's|-Werror||g' Makefile.in */Makefile.in
 
@@ -148,16 +158,25 @@ mkdir perl-examples
 find contrib -name '*.p[lm]' -exec mv {} perl-examples/ \;
 
 # Move config contribs
-mkdir -p $RPM_BUILD_ROOT/etc/collectd.d/
-cp contrib/redhat/apache.conf $RPM_BUILD_ROOT/etc/collectd.d/apache.conf
-cp contrib/redhat/email.conf $RPM_BUILD_ROOT/etc/collectd.d/email.conf
-cp contrib/redhat/sensors.conf $RPM_BUILD_ROOT/etc/collectd.d/sensors.conf
-cp contrib/redhat/mysql.conf $RPM_BUILD_ROOT/etc/collectd.d/mysql.conf
-cp contrib/redhat/nginx.conf $RPM_BUILD_ROOT/etc/collectd.d/nginx.conf
-cp contrib/redhat/snmp.conf $RPM_BUILD_ROOT/etc/collectd.d/snmp.conf
+mkdir -p %{buildroot}/etc/collectd.d/
+cp contrib/redhat/apache.conf %{buildroot}/etc/collectd.d/apache.conf
+cp contrib/redhat/email.conf %{buildroot}/etc/collectd.d/email.conf
+cp contrib/redhat/mysql.conf %{buildroot}/etc/collectd.d/mysql.conf
+cp contrib/redhat/nginx.conf %{buildroot}/etc/collectd.d/nginx.conf
+cp contrib/redhat/sensors.conf %{buildroot}/etc/collectd.d/sensors.conf
+cp contrib/redhat/snmp.conf %{buildroot}/etc/collectd.d/snmp.conf
+
+# configs for subpackaged plugins
+for p in dns libvirt perl rrdtool
+do
+%{__cat} > %{buildroot}/etc/collectd.d/$p.conf <<EOF
+LoadPlugin $p
+EOF
+done
+
 
 # *.la files shouldn't be distributed.
-rm -f $RPM_BUILD_ROOT/%{_libdir}/collectd/*.la
+rm -f %{buildroot}/%{_libdir}/collectd/*.la
 
 
 %post
@@ -184,6 +203,16 @@ fi
 
 %config(noreplace) %{_sysconfdir}/collectd.conf
 %config(noreplace) %{_sysconfdir}/collectd.d/
+%exclude %{_sysconfdir}/collectd.d/apache.conf
+%exclude %{_sysconfdir}/collectd.d/dns.conf
+%exclude %{_sysconfdir}/collectd.d/email.conf
+%exclude %{_sysconfdir}/collectd.d/libvirt.conf
+%exclude %{_sysconfdir}/collectd.d/mysql.conf
+%exclude %{_sysconfdir}/collectd.d/nginx.conf
+%exclude %{_sysconfdir}/collectd.d/perl.conf
+%exclude %{_sysconfdir}/collectd.d/rrdtool.conf
+%exclude %{_sysconfdir}/collectd.d/sensors.conf
+%exclude %{_sysconfdir}/collectd.d/snmp.conf
 
 %{_initrddir}/collectd
 %{_bindir}/collectd-nagios
@@ -194,6 +223,7 @@ fi
 %{_libdir}/collectd/*.so*
 %{_libdir}/collectd/types.db
 %exclude %{_libdir}/collectd/apache.so*
+%exclude %{_libdir}/collectd/dns.so*
 %exclude %{_libdir}/collectd/email.so*
 %exclude %{_libdir}/collectd/libvirt.so*
 %exclude %{_libdir}/collectd/mysql.so*
@@ -214,63 +244,68 @@ fi
 
 
 %files apache
-%doc COPYING
 %{_libdir}/collectd/apache.so*
 %config(noreplace) %{_sysconfdir}/collectd.d/apache.conf
 
 
+%files dns
+%{_libdir}/collectd/dns.so*
+%config(noreplace) %{_sysconfdir}/collectd.d/dns.conf
+
+
 %files email
-%doc COPYING
 %{_libdir}/collectd/email.so*
 %config(noreplace) %{_sysconfdir}/collectd.d/email.conf
 %doc %{_mandir}/man5/collectd-email.5*
 
 
 %files mysql
-%doc COPYING
 %{_libdir}/collectd/mysql.so*
 %config(noreplace) %{_sysconfdir}/collectd.d/mysql.conf
 
 
 %files nginx
-%doc COPYING
 %{_libdir}/collectd/nginx.so*
 %config(noreplace) %{_sysconfdir}/collectd.d/nginx.conf
 
 
 %files -n perl-Collectd
-%doc COPYING perl-examples/*
+%doc perl-examples/*
 %{_libdir}/collectd/perl.so*
 %{perl_vendorlib}/Collectd.pm
 %{perl_vendorlib}/Collectd/
+%config(noreplace) %{_sysconfdir}/collectd.d/perl.conf
 %doc %{_mandir}/man5/collectd-perl.5*
 %doc %{_mandir}/man3/Collectd::Unixsock.3pm*
 
 
 %files rrdtool
-%doc COPYING
 %{_libdir}/collectd/rrdtool.so*
+%config(noreplace) %{_sysconfdir}/collectd.d/rrdtool.conf
 
 
 %files sensors
-%doc COPYING
 %{_libdir}/collectd/sensors.so*
 %config(noreplace) %{_sysconfdir}/collectd.d/sensors.conf
 
 
 %files snmp
-%doc COPYING
 %{_libdir}/collectd/snmp.so*
 %config(noreplace) %{_sysconfdir}/collectd.d/snmp.conf
 %doc %{_mandir}/man5/collectd-snmp.5*
 
 
 %files virt
-%doc COPYING
 %{_libdir}/collectd/libvirt.so*
+%config(noreplace) %{_sysconfdir}/collectd.d/libvirt.conf
 
 
 %changelog
+* Thu Jun 12 2008 Alan Pevec <apevec@redhat.com> 4.3.3-1
+- New upstream version 4.3.3.
+- include /etc/collectd.d (bz#443942)
+- cleanup subpackages, split dns plugin
+
 * Tue Jun 10 2008 Chris Lalancette <clalance@redhat.com> - 4.3.2-9
 - Split rrdtool into a subpackage.
 
