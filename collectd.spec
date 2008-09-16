@@ -1,25 +1,30 @@
 Summary: Statistics collection daemon for filling RRD files
 Name: collectd
-Version: 4.3.3
-Release: 3%{?dist}
+Version: 4.4.3
+Release: 1%{?dist}
 License: GPLv2
 Group: System Environment/Daemons
 URL: http://collectd.org/
 
 Source: http://collectd.org/files/%{name}-%{version}.tar.bz2
-Patch0: %{name}-4.3.3-include-collectd.d.patch
+Patch0: %{name}-%{version}-include-collectd.d.patch
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
 BuildRequires: libvirt-devel, libxml2-devel
 BuildRequires: rrdtool-devel
 BuildRequires: lm_sensors-devel
 BuildRequires: curl-devel
+%if 0%{?fedora} >= 8
 BuildRequires: perl-libs, perl-devel
-BuildRequires: perl-ExtUtils-MakeMaker
-BuildRequires: perl-ExtUtils-Embed
+%else
+BuildRequires: perl
+%endif
+BuildRequires: perl(ExtUtils::MakeMaker)
+BuildRequires: perl(ExtUtils::Embed)
 BuildRequires: net-snmp-devel
 BuildRequires: libpcap-devel
 BuildRequires: mysql-devel
+BuildRequires: OpenIPMI-devel
 
 %description
 collectd is a small daemon written in C for performance.  It reads various
@@ -51,6 +56,14 @@ Group:         System Environment/Daemons
 Requires:      collectd = %{version}-%{release}, spamassassin
 %description email
 This plugin collects data provided by spamassassin.
+
+
+%package ipmi
+Summary:       IPMI module for collectd
+Group:         System Environment/Daemons
+Requires:      collectd = %{version}-%{release}, OpenIPMI
+%description ipmi
+This plugin for collectd provides IPMI support.
 
 
 %package mysql
@@ -121,6 +134,8 @@ sed -i.orig -e 's|-Werror||g' Makefile.in */Makefile.in
 
 %build
 %configure \
+    --without-libiptc \
+    --disable-ascent \
     --disable-static \
     --enable-mysql \
     --enable-sensors \
@@ -128,6 +143,7 @@ sed -i.orig -e 's|-Werror||g' Makefile.in */Makefile.in
     --enable-apache \
     --enable-perl \
     --enable-unixsock \
+    --enable-ipmi \
     --with-perl-bindings=INSTALLDIRS=vendor
 %{__make} %{?_smp_mflags}
 
@@ -167,7 +183,7 @@ cp contrib/redhat/sensors.conf %{buildroot}/etc/collectd.d/sensors.conf
 cp contrib/redhat/snmp.conf %{buildroot}/etc/collectd.d/snmp.conf
 
 # configs for subpackaged plugins
-for p in dns libvirt perl rrdtool
+for p in dns ipmi libvirt perl rrdtool
 do
 %{__cat} > %{buildroot}/etc/collectd.d/$p.conf <<EOF
 LoadPlugin $p
@@ -206,6 +222,7 @@ fi
 %exclude %{_sysconfdir}/collectd.d/apache.conf
 %exclude %{_sysconfdir}/collectd.d/dns.conf
 %exclude %{_sysconfdir}/collectd.d/email.conf
+%exclude %{_sysconfdir}/collectd.d/ipmi.conf
 %exclude %{_sysconfdir}/collectd.d/libvirt.conf
 %exclude %{_sysconfdir}/collectd.d/mysql.conf
 %exclude %{_sysconfdir}/collectd.d/nginx.conf
@@ -225,6 +242,7 @@ fi
 %exclude %{_libdir}/collectd/apache.so*
 %exclude %{_libdir}/collectd/dns.so*
 %exclude %{_libdir}/collectd/email.so*
+%exclude %{_libdir}/collectd/ipmi.so*
 %exclude %{_libdir}/collectd/libvirt.so*
 %exclude %{_libdir}/collectd/mysql.so*
 %exclude %{_libdir}/collectd/nginx.so*
@@ -244,32 +262,44 @@ fi
 
 
 %files apache
+%defattr(-, root, root, -)
 %{_libdir}/collectd/apache.so*
 %config(noreplace) %{_sysconfdir}/collectd.d/apache.conf
 
 
 %files dns
+%defattr(-, root, root, -)
 %{_libdir}/collectd/dns.so*
 %config(noreplace) %{_sysconfdir}/collectd.d/dns.conf
 
 
 %files email
+%defattr(-, root, root, -)
 %{_libdir}/collectd/email.so*
 %config(noreplace) %{_sysconfdir}/collectd.d/email.conf
 %doc %{_mandir}/man5/collectd-email.5*
 
 
+%files ipmi
+%defattr(-, root, root, -)
+%{_libdir}/collectd/ipmi.so*
+%config(noreplace) %{_sysconfdir}/collectd.d/ipmi.conf
+
+
 %files mysql
+%defattr(-, root, root, -)
 %{_libdir}/collectd/mysql.so*
 %config(noreplace) %{_sysconfdir}/collectd.d/mysql.conf
 
 
 %files nginx
+%defattr(-, root, root, -)
 %{_libdir}/collectd/nginx.so*
 %config(noreplace) %{_sysconfdir}/collectd.d/nginx.conf
 
 
 %files -n perl-Collectd
+%defattr(-, root, root, -)
 %doc perl-examples/*
 %{_libdir}/collectd/perl.so*
 %{perl_vendorlib}/Collectd.pm
@@ -280,27 +310,35 @@ fi
 
 
 %files rrdtool
+%defattr(-, root, root, -)
 %{_libdir}/collectd/rrdtool.so*
 %config(noreplace) %{_sysconfdir}/collectd.d/rrdtool.conf
 
 
 %files sensors
+%defattr(-, root, root, -)
 %{_libdir}/collectd/sensors.so*
 %config(noreplace) %{_sysconfdir}/collectd.d/sensors.conf
 
 
 %files snmp
+%defattr(-, root, root, -)
 %{_libdir}/collectd/snmp.so*
 %config(noreplace) %{_sysconfdir}/collectd.d/snmp.conf
 %doc %{_mandir}/man5/collectd-snmp.5*
 
 
 %files virt
+%defattr(-, root, root, -)
 %{_libdir}/collectd/libvirt.so*
 %config(noreplace) %{_sysconfdir}/collectd.d/libvirt.conf
 
 
 %changelog
+* Tue Sep 16 2008 Alan Pevec <apevec@redhat.com> 4.4.3-1
+- Switch F-9 to 4.4.x stable branch, new upstream bugfix release 4.4.3
+  http://collectd.org/news.shtml#news57
+
 * Tue Jul 01 2008 Alan Pevec <apevec@redhat.com> 4.3.3-3
 - rebuild for rrdtool update
 
