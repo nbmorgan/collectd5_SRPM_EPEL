@@ -1,13 +1,13 @@
 Summary: Statistics collection daemon for filling RRD files
 Name: collectd
-Version: 4.4.2
+Version: 4.4.3
 Release: 1%{?dist}
 License: GPLv2
 Group: System Environment/Daemons
 URL: http://collectd.org/
 
 Source: http://collectd.org/files/%{name}-%{version}.tar.bz2
-Patch0: %{name}-4.4.1-include-collectd.d.patch
+Patch0: %{name}-%{version}-include-collectd.d.patch
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
 BuildRequires: libvirt-devel, libxml2-devel
@@ -335,6 +335,9 @@ fi
 
 
 %changelog
+* Fri Oct 03 2008 Alan Pevec <apevec@redhat.com> 4.4.3-1
+- new upstream bugfix release 4.4.3 http://collectd.org/news.shtml#news57
+
 * Fri Aug 01 2008 Alan Pevec <apevec@redhat.com> 4.4.2-1
 - New upstream version 4.4.2.
 
