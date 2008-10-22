@@ -1,6 +1,6 @@
 Summary: Statistics collection daemon for filling RRD files
 Name: collectd
-Version: 4.4.3
+Version: 4.4.4
 Release: 1%{?dist}
 License: GPLv2
 Group: System Environment/Daemons
@@ -335,6 +335,9 @@ fi
 
 
 %changelog
+* Wed Oct 22 2008 Alan Pevec <apevec@redhat.com> 4.4.4-1
+- new upstream bugfix release 4.4.4 http://collectd.org/news.shtml#news59
+
 * Fri Oct 03 2008 Alan Pevec <apevec@redhat.com> 4.4.3-1
 - new upstream bugfix release 4.4.3 http://collectd.org/news.shtml#news57
 
