@@ -1,13 +1,16 @@
 Summary: Statistics collection daemon for filling RRD files
 Name: collectd
-Version: 4.4.3
-Release: 2%{?dist}
+Version: 4.4.1
+Release: 1%{?dist}
 License: GPLv2
 Group: System Environment/Daemons
 URL: http://collectd.org/
 
 Source: http://collectd.org/files/%{name}-%{version}.tar.bz2
 Patch0: %{name}-%{version}-include-collectd.d.patch
+# bug 468067 "pkg-config --libs OpenIPMIpthread" fails
+Patch1: %{name}-%{version}-configure-OpenIPMI.patch
+
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
 BuildRequires: libvirt-devel, libxml2-devel
@@ -128,6 +131,7 @@ This plugin collects information from virtualized guests.
 %prep
 %setup -q
 %patch0 -p1
+%patch1 -p0
 
 sed -i.orig -e 's|-Werror||g' Makefile.in */Makefile.in
 
@@ -335,6 +339,10 @@ fi
 
 
 %changelog
+* Wed Oct 22 2008 Alan Pevec <apevec@redhat.com> 4.4.4-1
+- new upstream bugfix release 4.4.4
+  http://collectd.org/news.shtml#news59
+
 * Thu Oct 02 2008 Alan Pevec <apevec@redhat.com> 4.4.3-2
 - exclude LoadPlugin email from default config
 
