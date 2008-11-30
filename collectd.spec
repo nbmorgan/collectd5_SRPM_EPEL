@@ -1,6 +1,6 @@
 Summary: Statistics collection daemon for filling RRD files
 Name: collectd
-Version: 4.4.4
+Version: 4.5.1
 Release: 2%{?dist}
 License: GPLv2
 Group: System Environment/Daemons
@@ -27,6 +27,8 @@ BuildRequires: net-snmp-devel
 BuildRequires: libpcap-devel
 BuildRequires: mysql-devel
 BuildRequires: OpenIPMI-devel
+BuildRequires: postgresql-devel
+BuildRequires: nut-devel
 
 %description
 collectd is a small daemon written in C for performance.  It reads various
@@ -39,7 +41,7 @@ fine grained since the files are updated every 10 seconds.
 %package apache
 Summary:       Apache plugin for collectd
 Group:         System Environment/Daemons
-Requires:      collectd = %{version}-%{release}, curl
+Requires:      collectd = %{version}-%{release}
 %description apache
 This plugin collects data provided by Apache's 'mod_status'.
 
@@ -63,7 +65,7 @@ This plugin collects data provided by spamassassin.
 %package ipmi
 Summary:       IPMI module for collectd
 Group:         System Environment/Daemons
-Requires:      collectd = %{version}-%{release}, OpenIPMI
+Requires:      collectd = %{version}-%{release}
 %description ipmi
 This plugin for collectd provides IPMI support.
 
@@ -71,7 +73,7 @@ This plugin for collectd provides IPMI support.
 %package mysql
 Summary:       MySQL module for collectd
 Group:         System Environment/Daemons
-Requires:      collectd = %{version}-%{release}, mysql
+Requires:      collectd = %{version}-%{release}
 %description mysql
 MySQL querying plugin. This plugins provides data of issued commands,
 called handlers and database traffic.
@@ -80,9 +82,17 @@ called handlers and database traffic.
 %package nginx
 Summary:       Nginx plugin for collectd
 Group:         System Environment/Daemons
-Requires:      collectd = %{version}-%{release}, curl
+Requires:      collectd = %{version}-%{release}
 %description nginx
 This plugin gets data provided by nginx.
+
+
+%package nut
+Summary:       Network UPS Tools module for collectd
+Group:         System Environment/Daemons
+Requires:      collectd = %{version}-%{release}
+%description nut
+This plugin for collectd provides Network UPS Tools support.
 
 
 %package -n perl-Collectd
@@ -92,6 +102,15 @@ Requires:      collectd = %{version}-%{release}
 Requires: perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
 %description -n perl-Collectd
 This package contains Perl bindings and plugin for collectd.
+
+
+%package postgresql
+Summary:       PostgreSQL module for collectd
+Group:         System Environment/Daemons
+Requires:      collectd = %{version}-%{release}
+%description postgresql
+PostgreSQL querying plugin. This plugins provides data of issued commands,
+called handlers and database traffic.
 
 
 %package rrdtool
@@ -122,7 +141,7 @@ This plugin for collectd provides querying of net-snmp.
 %package virt
 Summary:       Libvirt plugin for collectd
 Group:         System Environment/Daemons
-Requires:      collectd = %{version}-%{release}, libvirt
+Requires:      collectd = %{version}-%{release}
 %description virt
 This plugin collects information from virtualized guests.
 
@@ -147,6 +166,8 @@ sed -i.orig -e 's|-Werror||g' Makefile.in */Makefile.in
     --enable-perl \
     --enable-unixsock \
     --enable-ipmi \
+    --enable-nut \
+    --enable-postgresql \
     --with-perl-bindings=INSTALLDIRS=vendor
 %{__make} %{?_smp_mflags}
 
@@ -176,6 +197,9 @@ find %{buildroot} -name perllocal.pod -exec rm {} \;
 mkdir perl-examples
 find contrib -name '*.p[lm]' -exec mv {} perl-examples/ \;
 
+# postresql config example will be included by %doc
+rm %{buildroot}%{_datadir}/collectd/postgresql_default.conf
+
 # Move config contribs
 mkdir -p %{buildroot}/etc/collectd.d/
 cp contrib/redhat/apache.conf %{buildroot}/etc/collectd.d/apache.conf
@@ -186,7 +210,7 @@ cp contrib/redhat/sensors.conf %{buildroot}/etc/collectd.d/sensors.conf
 cp contrib/redhat/snmp.conf %{buildroot}/etc/collectd.d/snmp.conf
 
 # configs for subpackaged plugins
-for p in dns ipmi libvirt perl rrdtool
+for p in dns ipmi libvirt nut perl postgresql rrdtool
 do
 %{__cat} > %{buildroot}/etc/collectd.d/$p.conf <<EOF
 LoadPlugin $p
@@ -240,6 +264,7 @@ fi
 %{_sbindir}/collectdmon
 %dir %{_localstatedir}/lib/collectd/
 
+%dir %{_libdir}/collectd
 %{_libdir}/collectd/*.so*
 %{_libdir}/collectd/types.db
 %exclude %{_libdir}/collectd/apache.so*
@@ -247,9 +272,11 @@ fi
 %exclude %{_libdir}/collectd/email.so*
 %exclude %{_libdir}/collectd/ipmi.so*
 %exclude %{_libdir}/collectd/libvirt.so*
+%exclude %{_libdir}/collectd/nut.so*
 %exclude %{_libdir}/collectd/mysql.so*
 %exclude %{_libdir}/collectd/nginx.so*
 %exclude %{_libdir}/collectd/perl.so*
+%exclude %{_libdir}/collectd/postgresql.so*
 %exclude %{_libdir}/collectd/rrdtool.so*
 %exclude %{_libdir}/collectd/sensors.so*
 %exclude %{_libdir}/collectd/snmp.so*
@@ -301,6 +328,12 @@ fi
 %config(noreplace) %{_sysconfdir}/collectd.d/nginx.conf
 
 
+%files nut
+%defattr(-, root, root, -)
+%{_libdir}/collectd/nut.so*
+%config(noreplace) %{_sysconfdir}/collectd.d/nut.conf
+
+
 %files -n perl-Collectd
 %defattr(-, root, root, -)
 %doc perl-examples/*
@@ -310,6 +343,13 @@ fi
 %config(noreplace) %{_sysconfdir}/collectd.d/perl.conf
 %doc %{_mandir}/man5/collectd-perl.5*
 %doc %{_mandir}/man3/Collectd::Unixsock.3pm*
+
+
+%files postgresql
+%defattr(-, root, root, -)
+%{_libdir}/collectd/postgresql.so*
+%config(noreplace) %{_sysconfdir}/collectd.d/postgresql.conf
+%doc src/postgresql_default.conf
 
 
 %files rrdtool
@@ -338,6 +378,13 @@ fi
 
 
 %changelog
+* Sun Nov 30 2008 Alan Pevec <apevec@redhat.com> 4.5.1-1
+- New upstream version 4.5.1, bz# 470943
+  http://collectd.org/news.shtml#news59
+- enable Network UPS Tools (nut) plugin, bz# 465729
+- enable postgresql plugin
+- spec cleanup, bz# 473641
+
 * Wed Oct 22 2008 Alan Pevec <apevec@redhat.com> 4.4.4-2
 - workaround for https://bugzilla.redhat.com/show_bug.cgi?id=468067
 

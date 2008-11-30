@@ -1,6 +1,6 @@
---- configure.orig	2008-10-16 22:09:05.000000000 +0200
-+++ configure	2008-10-22 21:55:41.000000000 +0200
-@@ -36013,7 +36013,7 @@
+--- configure.ORIG	2008-10-16 22:43:28.000000000 +0200
++++ configure	2008-11-30 11:30:53.000000000 +0100
+@@ -36831,7 +36831,7 @@
  then
  	{ echo "$as_me:$LINENO: checking for libOpenIPMIpthread" >&5
  echo $ECHO_N "checking for libOpenIPMIpthread... $ECHO_C" >&6; }
@@ -9,7 +9,7 @@
  	if test "$?" != "0"
  	then
  		with_libopenipmipthread="no ($PKG_CONFIG doesn't know OpenIPMIpthread)"
-@@ -36026,7 +36026,7 @@
+@@ -36844,7 +36844,7 @@
  then
  	{ echo "$as_me:$LINENO: checking for libOpenIPMIpthread CFLAGS" >&5
  echo $ECHO_N "checking for libOpenIPMIpthread CFLAGS... $ECHO_C" >&6; }
@@ -18,7 +18,7 @@
  	if test "$?" = "0"
  	then
  		with_libopenipmipthread_cflags="$temp_result"
-@@ -36042,7 +36042,7 @@
+@@ -36860,7 +36860,7 @@
  then
  	{ echo "$as_me:$LINENO: checking for libOpenIPMIpthread LDFLAGS" >&5
  echo $ECHO_N "checking for libOpenIPMIpthread LDFLAGS... $ECHO_C" >&6; }
