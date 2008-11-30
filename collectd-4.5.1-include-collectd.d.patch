@@ -1,5 +1,5 @@
---- collectd-4.4.3/src/collectd.conf.in.orig	2008-09-04 09:59:01.000000000 +0200
-+++ collectd-4.4.3/src/collectd.conf.in	2008-09-16 14:46:43.000000000 +0200
+--- collectd-4.5.1/src/collectd.conf.in.ORIG	2008-10-16 22:29:56.000000000 +0200
++++ collectd-4.5.1/src/collectd.conf.in	2008-11-30 10:39:23.000000000 +0100
 @@ -26,7 +26,6 @@
  #	LogLevel info
  #</Plugin>
@@ -8,14 +8,15 @@
  @BUILD_PLUGIN_APCUPS_TRUE@LoadPlugin apcups
  @BUILD_PLUGIN_APPLE_SENSORS_TRUE@LoadPlugin apple_sensors
  @BUILD_PLUGIN_ASCENT_TRUE@LoadPlugin ascent
-@@ -36,37 +35,27 @@
+@@ -36,7 +35,6 @@
  @BUILD_PLUGIN_CSV_TRUE@LoadPlugin csv
  @BUILD_PLUGIN_DF_TRUE@LoadPlugin df
  @BUILD_PLUGIN_DISK_TRUE@LoadPlugin disk
 -@BUILD_PLUGIN_DNS_TRUE@LoadPlugin dns
--@BUILD_PLUGIN_EMAIL_TRUE@LoadPlugin email
+ @BUILD_PLUGIN_EMAIL_TRUE@LoadPlugin email
  @BUILD_PLUGIN_ENTROPY_TRUE@LoadPlugin entropy
  @BUILD_PLUGIN_EXEC_TRUE@LoadPlugin exec
+@@ -44,34 +42,24 @@
  @BUILD_PLUGIN_HDDTEMP_TRUE@LoadPlugin hddtemp
  @BUILD_PLUGIN_INTERFACE_TRUE@LoadPlugin interface
  @BUILD_PLUGIN_IPTABLES_TRUE@LoadPlugin iptables
@@ -33,10 +34,14 @@
  @BUILD_PLUGIN_NETWORK_TRUE@LoadPlugin network
  @BUILD_PLUGIN_NFS_TRUE@LoadPlugin nfs
 -@BUILD_PLUGIN_NGINX_TRUE@LoadPlugin nginx
+ @BUILD_PLUGIN_NOTIFY_DESKTOP_TRUE@LoadPlugin notify_desktop
+ @BUILD_PLUGIN_NOTIFY_EMAIL_TRUE@LoadPlugin notify_email
  @BUILD_PLUGIN_NTPD_TRUE@LoadPlugin ntpd
- @BUILD_PLUGIN_NUT_TRUE@LoadPlugin nut
+-@BUILD_PLUGIN_NUT_TRUE@LoadPlugin nut
+ @BUILD_PLUGIN_ONEWIRE_TRUE@LoadPlugin onewire
 -@BUILD_PLUGIN_PERL_TRUE@LoadPlugin perl
  @BUILD_PLUGIN_PING_TRUE@LoadPlugin ping
+-@BUILD_PLUGIN_POSTGRESQL_TRUE@LoadPlugin postgresql
  @BUILD_PLUGIN_POWERDNS_TRUE@LoadPlugin powerdns
  @BUILD_PLUGIN_PROCESSES_TRUE@LoadPlugin processes
 -@BUILD_PLUGIN_RRDTOOL_TRUE@LoadPlugin rrdtool
@@ -46,7 +51,7 @@
  @BUILD_PLUGIN_SWAP_TRUE@LoadPlugin swap
  @BUILD_PLUGIN_TAIL_TRUE@LoadPlugin tail
  @BUILD_PLUGIN_TAPE_TRUE@LoadPlugin tape
-@@ -348,3 +338,4 @@
+@@ -423,3 +411,4 @@
  #	Verbose false
  #</Plugin>
  
