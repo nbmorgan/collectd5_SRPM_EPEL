@@ -1,7 +1,7 @@
 Summary: Statistics collection daemon for filling RRD files
 Name: collectd
 Version: 4.5.1
-Release: 2%{?dist}
+Release: 2.1%{?dist}
 License: GPLv2
 Group: System Environment/Daemons
 URL: http://collectd.org/
@@ -253,7 +253,9 @@ fi
 %exclude %{_sysconfdir}/collectd.d/libvirt.conf
 %exclude %{_sysconfdir}/collectd.d/mysql.conf
 %exclude %{_sysconfdir}/collectd.d/nginx.conf
+%exclude %{_sysconfdir}/collectd.d/nut.conf
 %exclude %{_sysconfdir}/collectd.d/perl.conf
+%exclude %{_sysconfdir}/collectd.d/postgresql.conf
 %exclude %{_sysconfdir}/collectd.d/rrdtool.conf
 %exclude %{_sysconfdir}/collectd.d/sensors.conf
 %exclude %{_sysconfdir}/collectd.d/snmp.conf
@@ -378,6 +380,9 @@ fi
 
 
 %changelog
+* Sun Dec 07 2008 Alan Pevec <apevec@redhat.com> 4.5.1-2.1
+- fix subpackages, bz# 475093
+
 * Sun Nov 30 2008 Alan Pevec <apevec@redhat.com> 4.5.1-1
 - New upstream version 4.5.1, bz# 470943
   http://collectd.org/news.shtml#news59
