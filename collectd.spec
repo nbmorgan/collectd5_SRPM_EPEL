@@ -1,7 +1,7 @@
 Summary: Statistics collection daemon for filling RRD files
 Name: collectd
 Version: 4.5.4
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv2
 Group: System Environment/Daemons
 URL: http://collectd.org/
@@ -10,6 +10,10 @@ Source: http://collectd.org/files/%{name}-%{version}.tar.bz2
 Patch0: %{name}-4.5.1-include-collectd.d.patch
 # bug 468067 "pkg-config --libs OpenIPMIpthread" fails
 Patch1: %{name}-4.5.1-configure-OpenIPMI.patch
+# bug 516273 on upgrade collectd is not restarted
+Patch2: %{name}-%{version}-fix-condrestart.patch
+# bug 480997 collectd does not re-connect to libvirtd
+Patch3: %{name}-%{version}-libvirt-reconnect.patch
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
@@ -151,6 +155,8 @@ This plugin collects information from virtualized guests.
 %setup -q
 %patch0 -p1
 %patch1 -p0
+%patch2 -p0
+%patch3 -p1
 
 sed -i.orig -e 's|-Werror||g' Makefile.in */Makefile.in
 
@@ -407,6 +413,10 @@ fi
 
 
 %changelog
+* Wed Aug 12 2009 Alan Pevec <apevec@redhat.com> 4.5.4-2
+- fix condrestart: on upgrade collectd is not restarted, bz# 516273
+- collectd does not re-connect to libvirtd, bz# 480997
+
 * Tue Aug 11 2009 Alan Pevec <apevec@redhat.com> 4.5.4-1
 - New upstream version 4.5.4
   http://collectd.org/news.shtml#news66
