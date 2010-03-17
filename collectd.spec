@@ -1,12 +1,14 @@
 Summary: Statistics collection daemon for filling RRD files
 Name: collectd
 Version: 4.8.3
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv2
 Group: System Environment/Daemons
 URL: http://collectd.org/
 
 Source: http://collectd.org/files/%{name}-%{version}.tar.bz2
+Source1: collectd-httpd.conf
+Source2: collection.conf
 Patch0: %{name}-4.6.2-include-collectd.d.patch
 # bug 468067 "pkg-config --libs OpenIPMIpthread" fails
 Patch1: %{name}-4.6.2-configure-OpenIPMI.patch
@@ -142,6 +144,17 @@ Requires:       collectd = %{version}-%{release}, net-snmp
 This plugin for collectd provides querying of net-snmp.
 
 
+%package web
+Summary:        Contrib web interface to viewing rrd files
+Group:          System Environment/Daemons
+Requires:       collectd = %{version}-%{release}
+Requires:       collectd-rrdtool = %{version}-%{release}
+Requires:       perl-HTML-Parser, perl-Regexp-Common, rrdtool-perl, httpd
+%description web
+This package will allow for a simple web interface to view rrd files created by
+collectd.
+
+
 %package virt
 Summary:       Libvirt plugin for collectd
 Group:         System Environment/Daemons
@@ -189,6 +202,9 @@ sed -i.orig -e 's|-Werror||g' Makefile.in */Makefile.in
 %{__install} -Dp -m0755 contrib/fedora/init.d-collectd %{buildroot}%{_initrddir}/collectd
 
 %{__install} -d -m0755 %{buildroot}%{_localstatedir}/lib/collectd/
+%{__install} -d -m0755 %{buildroot}/%{_datadir}/collectd/collection3/
+%{__install} -d -m0755 %{buildroot}/%{_sysconfdir}/httpd/conf.d/
+
 
 # Convert docs to UTF-8
 find contrib/ -type f -exec %{__chmod} a-x {} \;
@@ -200,6 +216,14 @@ done
 find %{buildroot} -name .packlist -exec rm {} \;
 # Remove Perl temporary file perllocal.pod
 find %{buildroot} -name perllocal.pod -exec rm {} \;
+
+# copy web interface
+cp -ad contrib/collection3/* %{buildroot}/%{_datadir}/collectd/collection3/
+rm -f %{buildroot}/%{_datadir}/collectd/collection3/etc/collection.conf
+cp %{SOURCE1} %{buildroot}/%{_sysconfdir}/httpd/conf.d/collectd.conf
+cp %{SOURCE2} %{buildroot}%{_sysconfdir}/collection.conf
+ln -s %{_sysconfdir}/collection.conf %{buildroot}/%{_datadir}/collectd/collection3/etc/collection.conf
+chmod +x %{buildroot}/%{_datadir}/collectd/collection3/bin/*.cgi
 
 # Move the Perl examples to a separate directory.
 mkdir perl-examples
@@ -435,6 +459,13 @@ fi
 %doc %{_mandir}/man5/collectd-snmp.5*
 
 
+%files web
+%defattr(-, root, root, -)
+%{_datadir}/collectd/collection3/
+%config(noreplace) %{_sysconfdir}/httpd/conf.d/collectd.conf
+%config(noreplace) %{_sysconfdir}/collection.conf
+
+
 %files virt
 %defattr(-, root, root, -)
 %{_libdir}/collectd/libvirt.so
@@ -442,6 +473,9 @@ fi
 
 
 %changelog
+* Wed Mar 17 2010 Mike McGrath <mmcgrath@redhat.com> 4.8.3-2
+- Added web interface
+
 * Tue Feb 16 2010 Alan Pevec <apevec@redhat.com> 4.8.3-1
 - New upstream version 4.8.3
   http://collectd.org/news.shtml#news81
