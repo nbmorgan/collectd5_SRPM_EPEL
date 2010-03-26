@@ -1,7 +1,7 @@
 Summary: Statistics collection daemon for filling RRD files
 Name: collectd
 Version: 4.8.3
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv2
 Group: System Environment/Daemons
 URL: http://collectd.org/
@@ -35,6 +35,7 @@ BuildRequires: OpenIPMI-devel
 BuildRequires: postgresql-devel
 BuildRequires: nut-devel
 BuildRequires: iptables-devel
+BuildRequires: liboping-devel
 
 %description
 collectd is a small daemon written in C for performance.  It reads various
@@ -108,6 +109,14 @@ Requires:      collectd = %{version}-%{release}
 Requires: perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
 %description -n perl-Collectd
 This package contains Perl bindings and plugin for collectd.
+
+
+%package ping
+Summary:       ping module for collectd
+Group:         System Environment/Daemons
+Requires:      collectd = %{version}-%{release}
+%description ping
+This plugin for collectd provides network latency statistics.
 
 
 %package postgresql
@@ -187,7 +196,7 @@ sed -i.orig -e 's|-Werror||g' Makefile.in */Makefile.in
     --enable-nut \
     --enable-postgresql \
     --enable-iptables \
-    --disable-ping \
+    --enable-ping \
     --with-libiptc \
     --with-perl-bindings=INSTALLDIRS=vendor
 %{__make} %{?_smp_mflags}
@@ -242,7 +251,7 @@ cp contrib/redhat/sensors.conf %{buildroot}/etc/collectd.d/sensors.conf
 cp contrib/redhat/snmp.conf %{buildroot}/etc/collectd.d/snmp.conf
 
 # configs for subpackaged plugins
-for p in dns ipmi libvirt nut perl postgresql rrdtool
+for p in dns ipmi libvirt nut perl ping postgresql rrdtool
 do
 %{__cat} > %{buildroot}/etc/collectd.d/$p.conf <<EOF
 LoadPlugin $p
@@ -287,6 +296,7 @@ fi
 %exclude %{_sysconfdir}/collectd.d/nginx.conf
 %exclude %{_sysconfdir}/collectd.d/nut.conf
 %exclude %{_sysconfdir}/collectd.d/perl.conf
+%exclude %{_sysconfdir}/collectd.d/ping.conf
 %exclude %{_sysconfdir}/collectd.d/postgresql.conf
 %exclude %{_sysconfdir}/collectd.d/rrdtool.conf
 %exclude %{_sysconfdir}/collectd.d/sensors.conf
@@ -433,6 +443,12 @@ fi
 %doc %{_mandir}/man3/Collectd::Unixsock.3pm*
 
 
+%files ping
+%defattr(-, root, root, -)
+%{_libdir}/collectd/ping.so
+%config(noreplace) %{_sysconfdir}/collectd.d/ping.conf
+
+
 %files postgresql
 %defattr(-, root, root, -)
 %{_libdir}/collectd/postgresql.so
@@ -473,6 +489,9 @@ fi
 
 
 %changelog
+* Fri Mar 26 2010 Alan Pevec <apevec@redhat.com> 4.8.3-3
+- enable ping plugin bz#541744
+
 * Wed Mar 17 2010 Mike McGrath <mmcgrath@redhat.com> 4.8.3-2
 - Added web interface
 

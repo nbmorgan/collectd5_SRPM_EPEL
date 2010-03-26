@@ -30,7 +30,7 @@ diff -rup collectd-4.8.3-orig/src/collectd.conf.in collectd-4.8.3/src/collectd.c
  @BUILD_PLUGIN_LOAD_TRUE@@BUILD_PLUGIN_LOAD_TRUE@LoadPlugin load
  #@BUILD_PLUGIN_MADWIFI_TRUE@LoadPlugin madwifi
  #@BUILD_PLUGIN_MBMON_TRUE@LoadPlugin mbmon
-@@ -87,30 +82,22 @@ FQDNLookup   true
+@@ -87,30 +82,21 @@ FQDNLookup   true
  #@BUILD_PLUGIN_MEMCACHED_TRUE@LoadPlugin memcached
  @BUILD_PLUGIN_MEMORY_TRUE@@BUILD_PLUGIN_MEMORY_TRUE@LoadPlugin memory
  #@BUILD_PLUGIN_MULTIMETER_TRUE@LoadPlugin multimeter
@@ -48,7 +48,7 @@ diff -rup collectd-4.8.3-orig/src/collectd.conf.in collectd-4.8.3/src/collectd.c
  #@BUILD_PLUGIN_OPENVPN_TRUE@LoadPlugin openvpn
  #@BUILD_PLUGIN_ORACLE_TRUE@LoadPlugin oracle
 -#@BUILD_PLUGIN_PERL_TRUE@LoadPlugin perl
- #@BUILD_PLUGIN_PING_TRUE@LoadPlugin ping
+-#@BUILD_PLUGIN_PING_TRUE@LoadPlugin ping
 -#@BUILD_PLUGIN_POSTGRESQL_TRUE@LoadPlugin postgresql
  #@BUILD_PLUGIN_POWERDNS_TRUE@LoadPlugin powerdns
  #@BUILD_PLUGIN_PROCESSES_TRUE@LoadPlugin processes
