@@ -1,7 +1,7 @@
 Summary: Statistics collection daemon for filling RRD files
 Name: collectd
-Version: 4.8.3
-Release: 3%{?dist}
+Version: 4.8.5
+Release: 1%{?dist}
 License: GPLv2
 Group: System Environment/Daemons
 URL: http://collectd.org/
@@ -12,8 +12,6 @@ Source2: collection.conf
 Patch0: %{name}-4.6.2-include-collectd.d.patch
 # bug 468067 "pkg-config --libs OpenIPMIpthread" fails
 Patch1: %{name}-4.6.2-configure-OpenIPMI.patch
-# bug 564943 FTBFS system libiptc is not usable anymore, fix owniptc
-Patch2: libiptc-avoid-strict-aliasing-warnings.patch
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
@@ -176,7 +174,6 @@ This plugin collects information from virtualized guests.
 %setup -q
 %patch0 -p1
 %patch1 -p0
-%patch2 -p1
 
 sed -i.orig -e 's|-Werror||g' Makefile.in */Makefile.in
 
@@ -489,6 +486,10 @@ fi
 
 
 %changelog
+* Tue Jun 08 2010 Alan Pevec <apevec@redhat.com> 4.8.5-1
+- New upstream version 4.8.5
+  http://collectd.org/news.shtml#news83
+
 * Fri Mar 26 2010 Alan Pevec <apevec@redhat.com> 4.8.3-3
 - enable ping plugin bz#541744
 
