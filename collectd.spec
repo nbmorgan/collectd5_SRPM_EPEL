@@ -1,7 +1,7 @@
 Summary: Statistics collection daemon for filling RRD files
 Name: collectd
-Version: 4.10.2
-Release: 2%{?dist}
+Version: 4.10.3
+Release: 1%{?dist}
 License: GPLv2
 Group: System Environment/Daemons
 URL: http://collectd.org/
@@ -9,9 +9,7 @@ URL: http://collectd.org/
 Source: http://collectd.org/files/%{name}-%{version}.tar.bz2
 Source1: collectd-httpd.conf
 Source2: collection.conf
-Patch1: %{name}-%{version}-include-collectd.d.patch
-# bug 468067 "pkg-config --libs OpenIPMIpthread" fails
-Patch9999: %{name}-%{version}-configure-OpenIPMI.patch
+Patch1: collectd-4.10.2-include-collectd.d.patch
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
@@ -38,6 +36,7 @@ BuildRequires: nut-devel
 #BuildRequires: iptables-devel
 BuildRequires: liboping-devel
 BuildRequires: python-devel
+BuildRequires: libgcrypt-devel
 
 %description
 collectd is a small daemon written in C for performance.  It reads various
@@ -178,7 +177,6 @@ This plugin collects information from virtualized guests.
 %prep
 %setup -q
 %patch1 -p1
-%patch9999 -p0
 
 sed -i.orig -e 's|-Werror||g' Makefile.in */Makefile.in
 
@@ -587,6 +585,10 @@ fi
 %endif
 
 %changelog
+* Sun Jul 19 2011 Kevin Fenzi <kevin@scrye.com> - 4.10.3-1
+- Update to 4.3.10
+- Add libgcrypt to fix bug #676059
+
 * Thu Mar 24 2011 Kevin Fenzi <kevin@scrye.com> - 4.10.2-2
 - Update for EPEL6. 
 - Ship sensors and libvirt on ppc64, since it's available. 
