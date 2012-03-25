@@ -1,7 +1,7 @@
 Summary: Statistics collection daemon for filling RRD files
 Name: collectd
-Version: 4.10.3
-Release: 1%{?dist}
+Version: 4.10.6
+Release: 2%{?dist}
 License: GPLv2
 Group: System Environment/Daemons
 URL: http://collectd.org/
@@ -9,7 +9,7 @@ URL: http://collectd.org/
 Source: http://collectd.org/files/%{name}-%{version}.tar.bz2
 Source1: collectd-httpd.conf
 Source2: collection.conf
-Patch1: collectd-4.10.2-include-collectd.d.patch
+Patch1: collectd-4.10.6-include-collectd.d.patch
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
@@ -33,7 +33,7 @@ BuildRequires: mysql-devel
 BuildRequires: OpenIPMI-devel
 BuildRequires: postgresql-devel
 BuildRequires: nut-devel
-#BuildRequires: iptables-devel
+BuildRequires: iptables-devel
 BuildRequires: liboping-devel
 BuildRequires: python-devel
 BuildRequires: libgcrypt-devel
@@ -182,7 +182,7 @@ sed -i.orig -e 's|-Werror||g' Makefile.in */Makefile.in
 
 
 %build
-%configure \
+%configure CFLAGS=-"DLT_LAZY_OR_NOW='RTLD_LAZY|RTLD_GLOBAL'" \
     --disable-static \
     --disable-ascent \
     --disable-apple_sensors \
@@ -585,8 +585,14 @@ fi
 %endif
 
 %changelog
+* Sun Mar 25 2012 Kevin Fenzi <kevin@scrye.com> - 4.10.6-2
+- Fix python module loading. Fixes bug #806585
+
+* Fri Mar 02 2012 Kevin Fenzi <kevin@scrye.com> - 4.10.6-1
+- Update to 4.10.6
+
 * Sun Jul 19 2011 Kevin Fenzi <kevin@scrye.com> - 4.10.3-1
-- Update to 4.3.10
+- Update to 4.10.3
 - Add libgcrypt to fix bug #676059
 
 * Thu Mar 24 2011 Kevin Fenzi <kevin@scrye.com> - 4.10.2-2
