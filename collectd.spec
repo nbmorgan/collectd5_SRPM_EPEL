@@ -1,7 +1,7 @@
 Summary: Statistics collection daemon for filling RRD files
 Name: collectd
-Version: 4.10.6
-Release: 2%{?dist}
+Version: 4.10.7
+Release: 1%{?dist}
 License: GPLv2
 Group: System Environment/Daemons
 URL: http://collectd.org/
@@ -585,6 +585,9 @@ fi
 %endif
 
 %changelog
+* Wed Apr 04 2012 Kevin Fenzi <kevin@scrye.com> 4.10.7-1
+- Update to 4.10.7
+
 * Sun Mar 25 2012 Kevin Fenzi <kevin@scrye.com> - 4.10.6-2
 - Fix python module loading. Fixes bug #806585
 
