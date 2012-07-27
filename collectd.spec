@@ -1,6 +1,6 @@
 Summary: Statistics collection daemon for filling RRD files
 Name: collectd
-Version: 4.10.7
+Version: 5.1.0
 Release: 3%{?dist}
 License: GPLv2
 Group: System Environment/Daemons
@@ -10,7 +10,7 @@ Source: http://collectd.org/files/%{name}-%{version}.tar.bz2
 Source1: collectd-httpd.conf
 Source2: collection.conf
 Source3: collectd.service
-Patch1: %{name}-4.10.4-include-collectd.d.patch
+#Patch1: %{name}-4.10.4-include-collectd.d.patch
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
@@ -187,7 +187,7 @@ This plugin collects information from virtualized guests.
 
 %prep
 %setup -q
-%patch1 -p1
+#%patch1 -p1
 
 sed -i.orig -e 's|-Werror||g' Makefile.in */Makefile.in
 
