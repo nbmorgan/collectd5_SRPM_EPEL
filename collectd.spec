@@ -1,6 +1,6 @@
 Summary: Statistics collection daemon for filling RRD files
 Name: collectd
-Version: 4.10.7
+Version: 5.1.0
 Release: 1%{?dist}
 License: GPLv2
 Group: System Environment/Daemons
@@ -9,7 +9,7 @@ URL: http://collectd.org/
 Source: http://collectd.org/files/%{name}-%{version}.tar.bz2
 Source1: collectd-httpd.conf
 Source2: collection.conf
-Patch1: collectd-4.10.6-include-collectd.d.patch
+#Patch1: collectd-4.10.6-include-collectd.d.patch
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
@@ -36,7 +36,18 @@ BuildRequires: nut-devel
 BuildRequires: iptables-devel
 BuildRequires: liboping-devel
 BuildRequires: python-devel
+BuildRequires: java-devel >= 1.6
 BuildRequires: libgcrypt-devel
+
+BuildRequires: libmemcached-devel
+BuildRequires: libesmtp-devel
+BuildRequires: librabbitmq-devel
+BuildRequires: yajl-devel
+BuildRequires: libstatgrab-devel
+BuildRequires: libdbi-devel
+BuildRequires: libnotify-devel
+BuildRequires: protobuf-c-devel
+
 
 %description
 collectd is a small daemon written in C for performance.  It reads various
@@ -45,6 +56,14 @@ Since the daemon doesn't need to startup every time it wants to update the
 files it's very fast and easy on the system. Also, the statistics are very
 fine grained since the files are updated every 10 seconds.
 
+%package amqp
+Summary:       Rabbitmq(amqp) plugin for collectd
+Group:         System Environment/Daemons
+Requires:      collectd = %{version}-%{release}
+Requires:      librabbitmq
+%description amqp
+The AMQP plugin transmits or receives values collected by collectd via the Advanced Message Queuing Protocol (AMQP). Data is sent to or received from a "message broker" – a daemon relaying messages. The values are encoded in either the plain text protocol or JSON, though only the plain-text protocol can be parsed by the plugin at the moment. Messages can be sent in either persistent (guaranteed delivery) or transient (higher efficiency but values may be lost) delivery mode.
+
 
 %package apache
 Summary:       Apache plugin for collectd
@@ -52,6 +71,25 @@ Group:         System Environment/Daemons
 Requires:      collectd = %{version}-%{release}
 %description apache
 This plugin collects data provided by Apache's 'mod_status'.
+
+
+%package curl_json
+Summary:       cURL-JSON plugin for collectd, queries JSON data and parses it
+Group:         System Environment/Daemons
+Requires:      collectd = %{version}-%{release}
+Requires:      yajl
+Requires:      curl
+%description curl_json
+The cURL-JSON plugin queries JavaScript Object Notation (JSON) data using the cURL library and parses it according to the user's configuration using Yet Another JSON Library (YAJL). This can be used to query statistics information from a CouchDB instance, for example. This plugin is a generic plugin, i.e. it cannot work without configuration, because there is no reasonable default behavior. Please read the Plugin curl_json section of the collectd.conf(5) manual page for an in-depth description of the plugin's configuration.
+
+
+%package dbi
+Summary:       a dbi plugin for collectd which allows querying of a DB for metrics
+Group:         System Environment/Daemons
+Requires:      collectd = %{version}-%{release}
+Requires:      libdbi
+%description dbi
+The DBI plugin uses libdbi, a database abstraction library, to execute SQL statements on a database and read back the result. Depending on the configuration, the returned values are then converted into collectd "value lists" (the data structure used internally to pass statistics around). This plugin is a generic plugin, i.e. it cannot work without configuration, because there is no reasonable default behavior. Please read the Plugin dbi section of the collectd.conf(5) manual page for an in-depth description of the plugin's configuration.
 
 
 %package dns
@@ -77,14 +115,30 @@ Requires:      collectd = %{version}-%{release}
 %description ipmi
 This plugin for collectd provides IPMI support.
 
+%package java
+Summary:       java module for collectd
+Group:         System Environment/Daemons
+Requires:      collectd = %{version}-%{release}
+Requires:      java
+%description java
+The Java plugin embeds a Java virtual machine (JVM) into collectd and exposes the application programming interface (API) to Java programs.  This allows to write own plugins in the popular language, which are then loaded and executed by the daemon without the need to start a new process and JVM every few seconds. Java classes written for the Java plugin are therefore more powerful and efficient than scripts executed by the Exec plugin
+
+
+%package memcachec
+Summary:       memcachec module for collectd, allows metrics to be collected from a memcached data store
+Group:         System Environment/Daemons
+Requires:      collectd = %{version}-%{release}
+Requires:      libmemcached
+%description memcachec
+The memcachec plugin connects to a memcached server, queries one or more given pages and parses the returned data according to user specification. The matches used are similar to the matches used in the cURL and Tail plugins.  
+
 
 %package mysql
 Summary:       MySQL module for collectd
 Group:         System Environment/Daemons
 Requires:      collectd = %{version}-%{release}
 %description mysql
-MySQL querying plugin. This plugins provides data of issued commands,
-called handlers and database traffic.
+MySQL querying plugin. This plugins provides data of issued commands, called handlers and database traffic.
 
 
 %package nginx
@@ -93,6 +147,24 @@ Group:         System Environment/Daemons
 Requires:      collectd = %{version}-%{release}
 %description nginx
 This plugin gets data provided by nginx.
+
+
+%package notify_desktop
+Summary:       Add desktop/D-bus notifications to collectd
+Group:         System Environment/Daemons
+Requires:      collectd = %{version}-%{release}
+Requires:      libesmtp
+%description notify_desktop
+The Notify Desktop plugin uses libnotify to display notifications to the user via the desktop notification specification, i. e. on an X display.  This system is also know as D-Bus and supports multiple clients.
+
+
+%package notify_email
+Summary:       Add notify_email notifications to collectd
+Group:         System Environment/Daemons
+Requires:      collectd = %{version}-%{release}
+Requires:      libesmtp-devel
+%description notify_email
+The Notify Email plugin uses libESMTP to send notifications to a configured email address(es).
 
 
 %package nut
@@ -176,27 +248,21 @@ This plugin collects information from virtualized guests.
 
 %prep
 %setup -q
-%patch1 -p1
+#%patch1 -p1
 
 sed -i.orig -e 's|-Werror||g' Makefile.in */Makefile.in
 
 
 %build
-%configure CFLAGS=-"DLT_LAZY_OR_NOW='RTLD_LAZY|RTLD_GLOBAL'" \
+%configure JAVA_HOME="/usr/java/default/" CFLAGS=-"DLT_LAZY_OR_NOW='RTLD_LAZY|RTLD_GLOBAL'" \
     --disable-static \
     --disable-ascent \
     --disable-apple_sensors \
-    --disable-curl_json  \
-    --disable-dbi  \
     --disable-gmond \
     --disable-ipvs \
-    --disable-java \
-    --disable-memcachec \
     --disable-modbus \
     --disable-netapp \
     --disable-netlink \
-    --disable-notify_desktop \
-    --disable-notify_email \
     --disable-onewire \
     --disable-oracle \
     --disable-pinba \
@@ -210,6 +276,7 @@ sed -i.orig -e 's|-Werror||g' Makefile.in */Makefile.in
     --enable-apcups \
     --enable-battery \
     --enable-bind \
+    --enable-curl_json  \
     --enable-conntrack \
     --enable-contextswitch \
     --enable-cpu \
@@ -217,6 +284,7 @@ sed -i.orig -e 's|-Werror||g' Makefile.in */Makefile.in
     --enable-csv \
     --enable-curl \
     --enable-curl_xml \
+    --enable-dbi  \
     --enable-df \
     --enable-disk \
     --enable-dns \
@@ -233,6 +301,7 @@ sed -i.orig -e 's|-Werror||g' Makefile.in */Makefile.in
 %ifnarch ppc sparc sparc64
     --enable-libvirt \
 %endif
+    --enable-java \
     --enable-load \
     --enable-logfile \
     --enable-madwifi \
@@ -242,6 +311,7 @@ sed -i.orig -e 's|-Werror||g' Makefile.in */Makefile.in
     --enable-match_timediff \
     --enable-match_value \
     --enable-mbmon \
+    --enable-memcachec \
     --enable-memcached \
     --enable-memory \
     --enable-multimeter \
@@ -341,7 +411,7 @@ cp contrib/redhat/sensors.conf %{buildroot}/etc/collectd.d/sensors.conf
 cp contrib/redhat/snmp.conf %{buildroot}/etc/collectd.d/snmp.conf
 
 # configs for subpackaged plugins
-for p in dns ipmi libvirt nut perl ping postgresql rrdtool
+for p in dns java ipmi libvirt nut perl ping postgresql rrdtool
 do
 %{__cat} > %{buildroot}/etc/collectd.d/$p.conf <<EOF
 LoadPlugin $p
@@ -394,6 +464,7 @@ fi
 
 %{_initrddir}/collectd
 %{_bindir}/collectd-nagios
+%{_bindir}/collectdctl
 %{_sbindir}/collectd
 %{_sbindir}/collectdmon
 %dir %{_localstatedir}/lib/collectd/
@@ -409,6 +480,7 @@ fi
 %{_libdir}/collectd/df.so
 %{_libdir}/collectd/disk.so
 %{_libdir}/collectd/entropy.so
+%{_libdir}/collectd/ethstat.so
 %{_libdir}/collectd/exec.so
 %{_libdir}/collectd/filecount.so
 %{_libdir}/collectd/hddtemp.so
@@ -423,10 +495,12 @@ fi
 %{_libdir}/collectd/mbmon.so
 %{_libdir}/collectd/memcached.so
 %{_libdir}/collectd/memory.so
+%{_libdir}/collectd/md.so
 %{_libdir}/collectd/multimeter.so
 %{_libdir}/collectd/network.so
 %{_libdir}/collectd/nfs.so
 %{_libdir}/collectd/ntpd.so
+%{_libdir}/collectd/numa.so
 %{_libdir}/collectd/olsrd.so
 %{_libdir}/collectd/powerdns.so
 %{_libdir}/collectd/processes.so
@@ -436,15 +510,18 @@ fi
 %{_libdir}/collectd/syslog.so
 %{_libdir}/collectd/tail.so
 %{_libdir}/collectd/target_scale.so
+%{_libdir}/collectd/target_v5upgrade.so
 %{_libdir}/collectd/tcpconns.so
 %{_libdir}/collectd/teamspeak2.so
 %{_libdir}/collectd/thermal.so
+%{_libdir}/collectd/threshold.so
 %{_libdir}/collectd/unixsock.so
 %{_libdir}/collectd/users.so
 %{_libdir}/collectd/uuid.so
 %{_libdir}/collectd/vmem.so
 %{_libdir}/collectd/vserver.so
 %{_libdir}/collectd/wireless.so
+%{_libdir}/collectd/write_graphite.so
 %{_libdir}/collectd/write_http.so
 
 %{_libdir}/collectd/bind.so
@@ -476,18 +553,38 @@ fi
 %doc AUTHORS ChangeLog COPYING INSTALL README
 %doc %{_mandir}/man1/collectd.1*
 %doc %{_mandir}/man1/collectd-nagios.1*
+%doc %{_mandir}/man1/collectdctl.1*
 %doc %{_mandir}/man1/collectdmon.1*
 %doc %{_mandir}/man5/collectd.conf.5*
 %doc %{_mandir}/man5/collectd-exec.5*
-%doc %{_mandir}/man5/collectd-java.5*
 %doc %{_mandir}/man5/collectd-python.5*
+%doc %{_mandir}/man5/collectd-threshold.5*
 %doc %{_mandir}/man5/collectd-unixsock.5*
 %doc %{_mandir}/man5/types.db.5*
+
+%files amqp
+%defattr(-, root, root, -)
+%{_libdir}/collectd/amqp.so
+%config(noreplace) %{_sysconfdir}/collectd.d/amqp.conf
+
 
 %files apache
 %defattr(-, root, root, -)
 %{_libdir}/collectd/apache.so
 %config(noreplace) %{_sysconfdir}/collectd.d/apache.conf
+
+
+%files curl_json
+%defattr(-, root, root, -)
+%{_libdir}/collectd/curl_jason.so
+%config(noreplace) %{_sysconfdir}/collectd.d/curl_jason.conf
+
+
+%files dbi
+%defattr(-, root, root, -)
+%{_libdir}/collectd/dbi.so
+%config(noreplace) %{_sysconfdir}/collectd.d/dbi.conf
+
 
 
 %files dns
@@ -507,6 +604,15 @@ fi
 %defattr(-, root, root, -)
 %{_libdir}/collectd/ipmi.so
 %config(noreplace) %{_sysconfdir}/collectd.d/ipmi.conf
+
+
+%files java
+%defattr(-, root, root, -)
+%{_libdir}/collectd/java.so
+%{_datadir}/collectd/java/collectd-api.jar
+%{_datadir}/collectd/java/generic-jmx.jar
+%doc %{_mandir}/man5/collectd-java.5*
+%config(noreplace) %{_sysconfdir}/collectd.d/java.conf
 
 
 %files mysql
@@ -585,6 +691,10 @@ fi
 %endif
 
 %changelog
+* Fri Jul 07 2012 Blaine Morgan <nbmorgan@usa.net> 5.1.0-1
+- update to 5.1.0-1
+- added java pluging to the build
+
 * Wed Apr 04 2012 Kevin Fenzi <kevin@scrye.com> 4.10.7-1
 - Update to 4.10.7
 

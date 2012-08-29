@@ -1,4 +1,9 @@
-collectd-4.8.3.tar.bz2
-/collectd-4.10.3.tar.bz2
-/collectd-4.10.6.tar.bz2
-/collectd-4.10.7.tar.bz2
+#/collectd-5*.tar.bz2
+/.build-*.el6.log
+/.build-*.fc18.log
+/.collectd.spec.swp
+/collectd*.el6.src.rpm
+/collectd*.fc18.src.rpm
+/collectd-5*/
+collectd*.rpm.set.bz2
+/x86_64/
